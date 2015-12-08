@@ -64,7 +64,6 @@ public class IrisDataSetAnalyser {
 	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
 		int nbTest = 0;
 		int nbGoodPrediction = 0;
-		System.out.println("Executing TestKNNModel:\n");
 		for(Iris iris : testset) {
 			String result = QueryKNN(iris, learningset, N);
 			if(TestPrediction(iris, result)) {
@@ -73,11 +72,11 @@ public class IrisDataSetAnalyser {
 			nbTest++;
 		}
 		float accuracy = (float) (((float)nbGoodPrediction/nbTest)*100.0);
-		System.out.println("Accuracy: "+accuracy+"%");
+		System.out.println("\nAccuracy: "+accuracy+"%\n");
 	}
 	
 	public static boolean TestPrediction(Iris iris, String typePredicted){
-		System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted) + "\n");
+		System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted));
 		return iris.type.equals(typePredicted);
 	}
 	
@@ -85,7 +84,9 @@ public class IrisDataSetAnalyser {
 		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
 		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
 		//IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
+		System.out.println("*** Executing TestKNNModel: ***\n");
 		TestKNNModel(learningSet,testSet,1);
+		System.out.println("*** End of TestKNNModel ***\n");
 	}
 
 }
