@@ -29,7 +29,22 @@ public class Iris {
 				Math.pow(Math.abs(this.petal_width - other.petal_width),power);
 		dist = Math.pow(dist, 1.0/power);
 		
-		return dist;
+		return dist;		
 	}
 	
+	public double getDistanceSepalLength(Iris other, float power) {
+		return Math.pow(Math.pow(Math.abs(this.sepal_length - other.sepal_length), power), 1.0/power);
+	}
+	
+	public double getDistanceSepalWidth(Iris other, float power) {
+		return Math.pow(Math.pow(Math.abs(this.sepal_width - other.sepal_width), power), 1.0/power);
+	}
+	
+	public double getDistancePetalLength(Iris other, float power) {
+		return Math.pow(Math.pow(Math.abs(this.petal_length - other.petal_length), power), 1.0/power);
+	}
+	
+	public double getDistancePetalWidth(Iris other, float power) {
+		return Math.pow(Math.pow(Math.abs(this.petal_width - other.petal_width), power), 1.0/power);
+	}
 }
