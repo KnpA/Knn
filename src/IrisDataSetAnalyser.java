@@ -58,14 +58,13 @@ public class IrisDataSetAnalyser {
 	
 	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N) {
 		
-		return "Iris Type Placeholder";
+		return "Iris-virginica";
 	}
 	
 	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
 		int nbTest = 0;
 		int nbGoodPrediction = 0;
-		float accuracy = 0;
-		System.out.println("Executing TestKNNModel");
+		System.out.println("Executing TestKNNModel:\n");
 		for(Iris iris : testset) {
 			String result = QueryKNN(iris, learningset, N);
 			if(TestPrediction(iris, result)) {
@@ -73,8 +72,13 @@ public class IrisDataSetAnalyser {
 			}
 			nbTest++;
 		}
-		accuracy = nbGoodPrediction/nbTest*100;
+		float accuracy = (float) (((float)nbGoodPrediction/nbTest)*100.0);
 		System.out.println("Accuracy: "+accuracy+"%");
+	}
+	
+	public static boolean TestPrediction(Iris iris, String typePredicted){
+		System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted) + "\n");
+		return iris.type.equals(typePredicted);
 	}
 	
 	public static void main(String[] args) {
