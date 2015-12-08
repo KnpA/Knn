@@ -26,7 +26,7 @@ public class IrisDataSetAnalyser {
 						data[4]);
 				System.out.println(iris);
 				result.add(iris);
-				nbLines++
+				nbLines++;
 			}
 
 		} catch (FileNotFoundException e) {
@@ -52,8 +52,16 @@ public class IrisDataSetAnalyser {
 		for(i=0;i<dataset.size();i++) {
 			System.out.println("--");
 			System.out.println(iris.getDistance(dataset.get(i), 2));
-			System.out.println(iris.getDistance(dataset.get(i), 1));
-		}	
+			System.out.println(iris.getDistance(dataset.get(i), 1));			
+		}
+	}
+	
+	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N){
+		
+		return "Iris Type Placeholder";
+	}
+	
+	public static void TestKNNModel(ArrayList<Iris> learningset,ArrayList<Iris> testset, int N){
 		
 	}
 	
