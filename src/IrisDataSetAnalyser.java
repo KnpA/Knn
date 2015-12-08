@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-
 public class IrisDataSetAnalyser {
 
 		
@@ -21,8 +20,9 @@ public class IrisDataSetAnalyser {
 		String line = "";
 		// use comma as separator
 		String cvsSplitBy = ",";
-
+		int nbLines = 0;
 		try {
+			System.out.println("*** Reading file "+csvFile+" ***");
 			br = new BufferedReader(new FileReader(csvFile));
 			while ((line = br.readLine()) != null && !line.equals("")) {
 				String[] data = line.split(cvsSplitBy);
@@ -34,6 +34,7 @@ public class IrisDataSetAnalyser {
 						data[4]);
 				System.out.println(iris);
 				result.add(iris);
+				nbLines++;
 			}
 
 		} catch (FileNotFoundException e) {
@@ -50,14 +51,13 @@ public class IrisDataSetAnalyser {
 			}
 		}
 		
-		System.out.println("Done");	  
+		System.out.println("*** Done (Total: "+nbLines+" lines) ***\n");	  
 		return result;
-	
 	}
 	
-	public static void TestDistance(Iris iris, ArrayList<Iris> dataset){
+	public static void TestDistance(Iris iris, ArrayList<Iris> dataset) {
 		int i;
-		for(i=0;i<dataset.size();i++){
+		for(i=0;i<dataset.size();i++) {
 			System.out.println("--");
 			System.out.println(iris.getDistance(dataset.get(i), 2));
 			System.out.println(iris.getDistance(dataset.get(i), 1));			
@@ -93,18 +93,20 @@ public class IrisDataSetAnalyser {
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
 		
 		//get neighbors scores
-		for(i=0;i<results.size();i++){		
+		for(i=0;i<Math.min(N, results.size());i++){		
 			Iris r = results.get(i);
 			if(neighbors.containsKey(r.type)){
 				double d = neighbors.get(r.type);
 				d++;
-				System.out.println("Added neighbor "+ r.type);
+				System.out.println("Added neighbor score "+r.type+" to "+ d);
 				neighbors.put(r.type, d);				
 			}else{
 				neighbors.put(r.type, 1.0);
 			}
 		}
 		
+		
+		//get max type score
 		Iterator<Entry<String, Double>> entries = neighbors.entrySet().iterator();
 		String maxKey = null;
 		double maxValue = 0;
@@ -119,20 +121,36 @@ public class IrisDataSetAnalyser {
 		}
 		
 		return maxKey;
+
 	}
 	
-	public static void TestKNNModel(ArrayList<Iris> learningset,ArrayList<Iris> testset, int N){
-		
-		
+	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
+		int nbTest = 0;
+		int nbGoodPrediction = 0;
+		for(Iris iris : testset) {
+			String result = QueryKNN(iris, learningset, N);
+			if(TestPrediction(iris, result)) {
+				nbGoodPrediction++;
+			}
+			nbTest++;
+		}
+		float accuracy = (float) (((float)nbGoodPrediction/nbTest)*100.0);
+		System.out.println("\nAccuracy: "+accuracy+"%\n");
 	}
 	
+	public static boolean TestPrediction(Iris iris, String typePredicted){
+		System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted));
+		return iris.type.equals(typePredicted);
+	}
 	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ArrayList<Iris> dataset=IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
-		//IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), dataset);
-		
-		//System.out.println("Predicted :"+IrisDataSetAnalyser.QueryKNN(new Iris(3,2,5,2,"Jeej"), dataset, 3));
+
+		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
+		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
+		//IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
+		System.out.println("*** Executing TestKNNModel: ***\n");
+		TestKNNModel(learningSet,testSet,3);
+		System.out.println("*** End of TestKNNModel ***\n");
 	}
 
 }
