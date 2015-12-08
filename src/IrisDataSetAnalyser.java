@@ -75,20 +75,20 @@ public class IrisDataSetAnalyser {
 		//sort distances
 		while(!distances.isEmpty()){
 			Iterator<Entry<Iris, Double>> entries = distances.entrySet().iterator();
-			Iris maxKey = null;
-			double maxValue = 0;
+			Iris minKey = null;
+			double minValue = 0;
 			while(entries.hasNext()){
 				Map.Entry<Iris,Double> entry = (Map.Entry<Iris,Double>) entries.next();
 			    Iris key = (Iris)entry.getKey();
 			    Double value = (Double)entry.getValue();
-			    if(maxKey == null || maxValue < value){
-			    	maxKey = key;
-			    	maxValue = value;			    	
+			    if(minKey == null || minValue > value){
+			    	minKey = key;
+			    	minValue = value;			    	
 			    }
 			    
 			}
-			results.add(maxKey);
-			distances.remove(maxKey);			
+			results.add(minKey);
+			distances.remove(minKey);			
 		}
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
 		
