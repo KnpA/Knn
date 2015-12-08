@@ -48,15 +48,21 @@ public class IrisDataSetAnalyser {
 	}
 	
 	public static void TestDistance(Iris iris, ArrayList<Iris> dataset){
-		
 		int i;
 		for(i=0;i<dataset.size();i++){
 			System.out.println("--");
 			System.out.println(iris.getDistance(dataset.get(i), 2));
-			System.out.println(iris.getDistance(dataset.get(i), 1));
-			
+			System.out.println(iris.getDistance(dataset.get(i), 1));			
 		}
-			
+	}
+	
+	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N){
+		
+		return "Iris Type Placeholder";
+	}
+	
+	public static void TestKNNModel(ArrayList<Iris> learningset,ArrayList<Iris> testset, int N){
+		
 		
 	}
 	
