@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-
 public class IrisDataSetAnalyser {
 
 	public static ArrayList<Iris> ReadFile(String csvFile){
@@ -13,8 +12,9 @@ public class IrisDataSetAnalyser {
 		String line = "";
 		// use comma as separator
 		String cvsSplitBy = ",";
-
+		int nbLines = 0;
 		try {
+			System.out.println("*** Reading file "+csvFile+" ***");
 			br = new BufferedReader(new FileReader(csvFile));
 			while ((line = br.readLine()) != null && !line.equals("")) {
 				String[] data = line.split(cvsSplitBy);
@@ -26,6 +26,7 @@ public class IrisDataSetAnalyser {
 						data[4]);
 				System.out.println(iris);
 				result.add(iris);
+				nbLines++
 			}
 
 		} catch (FileNotFoundException e) {
@@ -42,29 +43,24 @@ public class IrisDataSetAnalyser {
 			}
 		}
 		
-		System.out.println("Done");	  
+		System.out.println("*** Done (Total: "+nbLines+" lines) ***\n");	  
 		return result;
-	
 	}
 	
-	public static void TestDistance(Iris iris, ArrayList<Iris> dataset){
-		
+	public static void TestDistance(Iris iris, ArrayList<Iris> dataset) {
 		int i;
-		for(i=0;i<dataset.size();i++){
+		for(i=0;i<dataset.size();i++) {
 			System.out.println("--");
 			System.out.println(iris.getDistance(dataset.get(i), 2));
 			System.out.println(iris.getDistance(dataset.get(i), 1));
-			
-		}
-			
+		}	
 		
 	}
 	
-	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		ArrayList<Iris> dataset=IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
-		IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), dataset);
+		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
+		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
+		IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
 	}
 
 }
