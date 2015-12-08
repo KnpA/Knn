@@ -56,19 +56,32 @@ public class IrisDataSetAnalyser {
 		}
 	}
 	
-	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N){
+	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N) {
 		
 		return "Iris Type Placeholder";
 	}
 	
-	public static void TestKNNModel(ArrayList<Iris> learningset,ArrayList<Iris> testset, int N){
-		
+	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
+		int nbTest = 0;
+		int nbGoodPrediction = 0;
+		float accuracy = 0;
+		System.out.println("Executing TestKNNModel");
+		for(Iris iris : testset) {
+			String result = QueryKNN(iris, learningset, N);
+			if(TestPrediction(iris, result)) {
+				nbGoodPrediction++;
+			}
+			nbTest++;
+		}
+		accuracy = nbGoodPrediction/nbTest*100;
+		System.out.println("Accuracy: "+accuracy+"%");
 	}
 	
 	public static void main(String[] args) {
 		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
 		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
-		IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
+		//IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
+		TestKNNModel(learningSet,testSet,1);
 	}
 
 }
