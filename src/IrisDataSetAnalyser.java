@@ -66,6 +66,12 @@ public class IrisDataSetAnalyser {
 		
 	}
 	
+	public static Boolean TestPrediction(Iris iris, String typePredicted){
+		System.out.println("Predicted type:" + typePredicted);
+		System.out.println("Real iris type:" + iris.type);
+		System.out.println("Prediction is" + iris.type.equals(typePredicted));
+		return iris.type.equals(typePredicted);
+	}
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
