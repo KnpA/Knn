@@ -10,7 +10,14 @@ import java.util.Map.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class IrisDataSetAnalyser {
+	private static final boolean VERBOSE = true;
+	private static final boolean DEBUG = false;
 
+	/**
+	 * Lecture d'un fichier de données au format CSV
+	 * @param csvFile Nom du fichier à parcourir
+	 * @return Liste d'Iris contenus dans le fichier
+	 */
 	public static ArrayList<Iris> ReadFile(String csvFile) {
 		ArrayList<Iris> result = new ArrayList<Iris>();
 		BufferedReader br = null;
@@ -19,9 +26,10 @@ public class IrisDataSetAnalyser {
 		String cvsSplitBy = ",";
 		int nbLines = 0;
 		try {
-			System.out.println("*** Reading file "+csvFile+" ***");
+			if(VERBOSE)
+				System.out.println("*** Reading file "+csvFile+" ***");
 			br = new BufferedReader(new FileReader(csvFile));
-			//read file line by line
+			// read file line by line
 			while ((line = br.readLine()) != null && !line.equals("")) {
 				String[] data = line.split(cvsSplitBy);
 				Iris iris =new Iris(
@@ -30,7 +38,8 @@ public class IrisDataSetAnalyser {
 						Float.parseFloat(data[2]),
 						Float.parseFloat(data[3]),
 						data[4]);
-				System.out.println(iris);
+				if(DEBUG)
+					System.out.println(iris);
 				result.add(iris);
 				nbLines++;
 			}
@@ -48,11 +57,13 @@ public class IrisDataSetAnalyser {
 				}
 			}
 		}
-		
-		System.out.println("*** Done (Total: "+nbLines+" lines) ***\n");	  
+		if(VERBOSE)
+			System.out.println("*** Done (Total: "+nbLines+" lines) ***\n");	  
 		return result;
 	}
 	
+	/*
+	 * Fonction plus utilisée, à enlever ?
 	public static void TestDistance(Iris iris, ArrayList<Iris> dataset) {
 		int i;
 		for(i=0;i<dataset.size();i++) {
@@ -60,17 +71,17 @@ public class IrisDataSetAnalyser {
 			System.out.println(iris.getDistance(dataset.get(i), 2));
 			System.out.println(iris.getDistance(dataset.get(i), 1));			
 		}
-	}
+	}*/
 	
 	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N) {
 		HashMap<Iris,Double> distances = new HashMap<Iris,Double>();
 		ArrayList<Iris> results = new ArrayList<Iris>();
 		int i;
-		//get distances
+		// get distances
 		for(i=0;i<learningset.size();i++) {			
 			distances.put(learningset.get(i), iris.getDistance(learningset.get(i), 2));
 		}
-		//sort distances
+		// sort distances
 		while(!distances.isEmpty()) {
 			Iterator<Entry<Iris, Double>> entries = distances.entrySet().iterator();
 			Iris minKey = null;
@@ -91,7 +102,7 @@ public class IrisDataSetAnalyser {
 		}
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
 		
-		//get neighbors scores
+		// get neighbors scores
 		for(i=0;i<Math.min(N, results.size());i++) {		
 			Iris r = results.get(i);
 			if(neighbors.containsKey(r.type)) {
@@ -104,7 +115,7 @@ public class IrisDataSetAnalyser {
 			}
 		}
 		
-		//get max type score
+		// get max type score
 		Iterator<Entry<String, Double>> entries = neighbors.entrySet().iterator();
 		String maxKey = null;
 		double maxValue = 0;
@@ -122,10 +133,16 @@ public class IrisDataSetAnalyser {
 		return maxKey;
 	}
 	
+	/**
+	 * Boucle de prédiction sur tout le Test Set
+	 * @param learningset Learning Set données apprises
+	 * @param testset Test Set à observer
+	 * @param N Nombre de voisins proches à comparer 
+	 */
 	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
 		int nbTest = 0;
 		int nbGoodPrediction = 0;
-		
+			
 		for(Iris iris : testset) {
 			String result = QueryKNN(iris, learningset, N);
 			if(TestPrediction(iris, result)) {
@@ -135,15 +152,27 @@ public class IrisDataSetAnalyser {
 		}
 		
 		float accuracy = (float) (((float)nbGoodPrediction/nbTest)*100.0);
+		
 		System.out.println("Accuracy: "+String.format("%.2f", accuracy)+"% for N="+N);
 	}
 	
+	/**
+	 * Retourne le résultat d'une prédiction avec la valeur réelle de l'Iris
+	 * @param iris Iris à comparer
+	 * @param typePredicted Type de l'Iris prédit
+	 * @return true si la prédiction est juste, false sinon 
+	 */
 	public static boolean TestPrediction(Iris iris, String typePredicted) {
 		//System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted));
 		return iris.type.equals(typePredicted);
 	}
 	
-	public static void RandomTest(int LearningSetPercentage) {
+	/**
+	 * Test avec un Learning Set contenant des valeurs choisies aléatoirement
+	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
+	 * @param maxK K voisins maximum voulu
+	 */
+	public static void RandomTest(int LearningSetPercentage, int maxK) {
 		ArrayList<Iris> learningSet = new ArrayList<Iris>();
 		ArrayList<Iris> testSet = new ArrayList<Iris>();
 		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
@@ -152,7 +181,8 @@ public class IrisDataSetAnalyser {
 		int learningSize = TOTAL_SIZE*LearningSetPercentage/100;
 		int currentSize = TOTAL_SIZE;
 		
-		System.out.println("LearningSet percentage = "+LearningSetPercentage+"%");
+		if(VERBOSE)
+			System.out.println("LearningSet percentage = "+LearningSetPercentage+"%");
 		
 		for(currentSize=TOTAL_SIZE; currentSize > 0; currentSize--) {
 			int index = ThreadLocalRandom.current().nextInt(0, currentSize);
@@ -164,38 +194,57 @@ public class IrisDataSetAnalyser {
 			}
 		}
 		
-		System.out.println("LearningSet size = "+learningSet.size());
-		System.out.println("TestSet size = "+testSet.size()+"\n");
-		
-		System.out.println("*** Executing TestKNNModel: ***\n");
+		if(VERBOSE) {
+			System.out.println("LearningSet size = "+learningSet.size());
+			System.out.println("TestSet size = "+testSet.size()+"\n");
+			System.out.println("*** Executing Random TestKNNModel: ***\n");
+		}
 		int k = 1;
 
-		for(k=1;k<=learningSize;k++){
+		if(maxK < 1 || maxK > learningSet.size())
+			maxK = learningSet.size();
+		
+		for(k=1;k<=maxK;k++){
 			TestKNNModel(learningSet,testSet,k);			
 		}
-		System.out.println("\n*** End of TestKNNModel ***\n");
+		if(VERBOSE)
+			System.out.println("\n*** End of Random TestKNNModel ***\n");
 	}
 	
-	public static void FixedTest() {
+	/**
+	 * Test sur un Learning Set enregistré en dur
+	 * @param maxK K maximum voulu de voisins
+	 */
+	public static void FixedTest(int maxK) {
 		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
 		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
 		
-		System.out.println("LearningSet size = "+learningSet.size());
-		System.out.println("TestSet size = "+testSet.size()+"\n");
-		
-		System.out.println("*** Executing TestKNNModel: ***\n");
+		if(VERBOSE) {
+			System.out.println("LearningSet size = "+learningSet.size());
+			System.out.println("TestSet size = "+testSet.size()+"\n");	
+			System.out.println("*** Executing Fixed TestKNNModel: ***\n");
+		}
 		int k = 1;
+		
+		if(maxK < 1 || maxK > learningSet.size())
+			maxK = learningSet.size();
 
-		for(k=1;k<=learningSet.size();k++){
+		for(k=1;k<=maxK;k++){
 			TestKNNModel(learningSet,testSet,k);			
 		}
-		System.out.println("\n*** End of TestKNNModel ***\n");
+		
+		if(VERBOSE)
+			System.out.println("\n*** End of Fixed TestKNNModel ***\n");
 	}
 	
+	/**
+	 * Main
+	 * @param args
+	 */
 	public static void main(String[] args) {		
-		// Define Percentage of Learning Data Set and see Accuracy
-		RandomTest(20);
-		// Example with a defined Learning Set of 20%
-		//FixedTest();
+		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
+		RandomTest(70,10);
+		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
+		//FixedTest(10);
 	}
 }

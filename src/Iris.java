@@ -1,13 +1,23 @@
 
 public class Iris {
 	
-	public float sepal_length,
-		sepal_width,
-		petal_length,
-		petal_width;
+	// Attributs
+	public float sepal_length;
+	public float sepal_width;
+	public float petal_length;
+	public float petal_width;
 	
+	// Resultat
 	public String type;
 	
+	/**
+	 * Construteur d'Iris
+	 * @param sl Longueur du sepal
+	 * @param sw Largeur du sepal
+	 * @param pl Longueur du petal
+	 * @param pw Largeur du petal
+	 * @param t  Type de l'Iris
+	 */
 	public Iris(float sl, float sw, float pl, float pw, String t) {
 		sepal_length = sl;
 		sepal_width = sw;
@@ -16,12 +26,19 @@ public class Iris {
 		type = t;
 	}
 	
-	
-	
+	/**
+	 * Méthode d'affichage d'un Iris
+	 */
 	public String toString() {
 		return type+" : [sepal length : "+sepal_length+", sepal width : "+sepal_width+", petal length : "+petal_length+", petal_width : "+petal_width+"]";
 	}
 	
+	/**
+	 * Méthode retournant la distance entre deux Iris
+	 * @param other Iris à comparer
+	 * @param power Type de distance voulue (1 = Manhattan, 2 = Euclidienne, ...)
+	 * @return La distance entre deux Iris
+	 */
 	public double getDistance(Iris other, float power) {
 		double dist;
 		
