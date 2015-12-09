@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class IrisDataSetAnalyser {
 
@@ -142,15 +143,59 @@ public class IrisDataSetAnalyser {
 		return iris.type.equals(typePredicted);
 	}
 	
-	public static void main(String[] args) {
-		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
-		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
-		//IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
+	public static void RandomTest(int LearningSetPercentage) {
+		ArrayList<Iris> learningSet = new ArrayList<Iris>();
+		ArrayList<Iris> testSet = new ArrayList<Iris>();
+		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
+		
+		int TOTAL_SIZE = 150;
+		int learningSize = TOTAL_SIZE*LearningSetPercentage/100;
+		int currentSize = TOTAL_SIZE;
+		
+		System.out.println("LearningSet percentage = "+LearningSetPercentage+"%");
+		
+		for(currentSize=TOTAL_SIZE; currentSize > 0; currentSize--) {
+			int index = ThreadLocalRandom.current().nextInt(0, currentSize);
+			Iris i = dataSet.remove(index);
+			if(learningSet.size() < learningSize) {
+				learningSet.add(i);
+			} else {
+				testSet.add(i);
+			}
+		}
+		
+		System.out.println("LearningSet size = "+learningSet.size());
+		System.out.println("TestSet size = "+testSet.size()+"\n");
+		
 		System.out.println("*** Executing TestKNNModel: ***\n");
-		int i = 1;
-		for(i=1;i<=40;i++){
-			TestKNNModel(learningSet,testSet,i);			
+		int k = 1;
+
+		for(k=1;k<=learningSize;k++){
+			TestKNNModel(learningSet,testSet,k);			
 		}
 		System.out.println("\n*** End of TestKNNModel ***\n");
+	}
+	
+	public static void FixedTest() {
+		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
+		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
+		
+		System.out.println("LearningSet size = "+learningSet.size());
+		System.out.println("TestSet size = "+testSet.size()+"\n");
+		
+		System.out.println("*** Executing TestKNNModel: ***\n");
+		int k = 1;
+
+		for(k=1;k<=learningSet.size();k++){
+			TestKNNModel(learningSet,testSet,k);			
+		}
+		System.out.println("\n*** End of TestKNNModel ***\n");
+	}
+	
+	public static void main(String[] args) {		
+		// Define Percentage of Learning Data Set and see Accuracy
+		RandomTest(20);
+		// Example with a defined Learning Set of 20%
+		//FixedTest();
 	}
 }
