@@ -16,6 +16,8 @@ public class Iris {
 		type = t;
 	}
 	
+	
+	
 	public String toString() {
 		return type+" : [sepal length : "+sepal_length+", sepal width : "+sepal_width+", petal length : "+petal_length+", petal_width : "+petal_width+"]";
 	}

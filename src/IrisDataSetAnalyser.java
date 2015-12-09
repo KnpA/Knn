@@ -20,7 +20,7 @@ public class IrisDataSetAnalyser {
 		try {
 			System.out.println("*** Reading file "+csvFile+" ***");
 			br = new BufferedReader(new FileReader(csvFile));
-			
+			//read file line by line
 			while ((line = br.readLine()) != null && !line.equals("")) {
 				String[] data = line.split(cvsSplitBy);
 				Iris iris =new Iris(
@@ -96,7 +96,7 @@ public class IrisDataSetAnalyser {
 			if(neighbors.containsKey(r.type)) {
 				double d = neighbors.get(r.type);
 				d++;
-				System.out.println("Added neighbor score "+r.type+" to "+ d);
+				//System.out.println("Added neighbor score "+r.type+" to "+ d);
 				neighbors.put(r.type, d);				
 			} else {
 				neighbors.put(r.type, 1.0);
@@ -134,11 +134,11 @@ public class IrisDataSetAnalyser {
 		}
 		
 		float accuracy = (float) (((float)nbGoodPrediction/nbTest)*100.0);
-		System.out.println("\nAccuracy: "+accuracy+"%\n");
+		System.out.println("Accuracy: "+String.format("%.2f", accuracy)+"% for N="+N);
 	}
 	
 	public static boolean TestPrediction(Iris iris, String typePredicted) {
-		System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted));
+		//System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted));
 		return iris.type.equals(typePredicted);
 	}
 	
@@ -147,7 +147,10 @@ public class IrisDataSetAnalyser {
 		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
 		//IrisDataSetAnalyser.TestDistance(new Iris(3,2,5,2,"Jeej"), learningSet);
 		System.out.println("*** Executing TestKNNModel: ***\n");
-		TestKNNModel(learningSet,testSet,3);
-		System.out.println("*** End of TestKNNModel ***\n");
+		int i = 1;
+		for(i=1;i<=40;i++){
+			TestKNNModel(learningSet,testSet,i);			
+		}
+		System.out.println("\n*** End of TestKNNModel ***\n");
 	}
 }
