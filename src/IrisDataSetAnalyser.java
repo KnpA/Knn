@@ -153,7 +153,7 @@ public class IrisDataSetAnalyser {
 		
 		float accuracy = (float) (((float)nbGoodPrediction/nbTest)*100.0);
 		
-		System.out.println("Accuracy: "+String.format("%.2f", accuracy)+"% for N="+N);
+		System.out.println("Accuracy: "+String.format("%.2f", accuracy)+"% for K="+N);
 	}
 	
 	/**
@@ -210,29 +210,53 @@ public class IrisDataSetAnalyser {
 		if(VERBOSE)
 			System.out.println("\n*** End of Random TestKNNModel ***\n");
 	}
-	
+
 	/**
-	 * Test sur un Learning Set enregistré en dur
-	 * @param maxK K maximum voulu de voisins
+	 * Test avec un Learning Set contenant des valeurs choisies linéairement par un pourcentage
+	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
+	 * @param maxK K voisins maximum voulu
 	 */
-	public static void FixedTest(int maxK) {
-		ArrayList<Iris> learningSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_learning.data");
-		ArrayList<Iris> testSet = IrisDataSetAnalyser.ReadFile("./datasets/iris_test.data");
+	public static void FixedTest(int LearningSetPercentage, int maxK) {
+		ArrayList<Iris> learningSet = new ArrayList<Iris>();
+		ArrayList<Iris> testSet = new ArrayList<Iris>();
+		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
+		
+		int NB_CLASSES = 3;
+		int TOTAL_SIZE = 150;
+		int CLASS_SIZE = TOTAL_SIZE/NB_CLASSES;
+		int learningSize = CLASS_SIZE*NB_CLASSES*LearningSetPercentage/100;
+		
+		if(VERBOSE)
+			System.out.println("LearningSet percentage = "+LearningSetPercentage+"%");
+		
+		for(int i=0; i < CLASS_SIZE; i++) {
+			Iris iris1 = dataSet.get(i);
+			Iris iris2 = dataSet.get(i+CLASS_SIZE);
+			Iris iris3 = dataSet.get(i+2*CLASS_SIZE);
+			if(learningSet.size() < learningSize) {
+				learningSet.add(iris1);
+				learningSet.add(iris2);
+				learningSet.add(iris3);
+			} else {
+				testSet.add(iris1);
+				testSet.add(iris2);
+				testSet.add(iris3);
+			}
+		}
 		
 		if(VERBOSE) {
 			System.out.println("LearningSet size = "+learningSet.size());
-			System.out.println("TestSet size = "+testSet.size()+"\n");	
+			System.out.println("TestSet size = "+testSet.size()+"\n");
 			System.out.println("*** Executing Fixed TestKNNModel: ***\n");
 		}
 		int k = 1;
-		
+
 		if(maxK < 1 || maxK > learningSet.size())
 			maxK = learningSet.size();
-
+		
 		for(k=1;k<=maxK;k++){
 			TestKNNModel(learningSet,testSet,k);			
 		}
-		
 		if(VERBOSE)
 			System.out.println("\n*** End of Fixed TestKNNModel ***\n");
 	}
@@ -243,8 +267,8 @@ public class IrisDataSetAnalyser {
 	 */
 	public static void main(String[] args) {		
 		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
-		RandomTest(70,10);
+		RandomTest(50,10);
 		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
-		//FixedTest(10);
+		FixedTest(28,50);
 	}
 }
