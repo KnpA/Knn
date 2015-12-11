@@ -62,25 +62,20 @@ public class IrisDataSetAnalyser {
 		return result;
 	}
 	
-	/*
-	 * Fonction plus utilisée, à enlever ?
-	public static void TestDistance(Iris iris, ArrayList<Iris> dataset) {
-		int i;
-		for(i=0;i<dataset.size();i++) {
-			System.out.println("--");
-			System.out.println(iris.getDistance(dataset.get(i), 2));
-			System.out.println(iris.getDistance(dataset.get(i), 1));			
-		}
-	}*/
 	
-	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N) {
+	public static HashMap<Iris,Double> GetDistances(Iris iris, ArrayList<Iris> dataset){
 		HashMap<Iris,Double> distances = new HashMap<Iris,Double>();
-		ArrayList<Iris> results = new ArrayList<Iris>();
 		int i;
 		// get distances
-		for(i=0;i<learningset.size();i++) {			
-			distances.put(learningset.get(i), iris.getDistance(learningset.get(i), 2));
+		for(i=0;i<dataset.size();i++) {			
+			distances.put(dataset.get(i), iris.getDistance(dataset.get(i), 2));
 		}
+		
+		return distances;
+	}
+	
+	public static ArrayList<Iris> SortDistances(HashMap<Iris,Double> distances){
+		ArrayList<Iris> results = new ArrayList<Iris>();
 		// sort distances
 		while(!distances.isEmpty()) {
 			Iterator<Entry<Iris, Double>> entries = distances.entrySet().iterator();
@@ -100,9 +95,25 @@ public class IrisDataSetAnalyser {
 			results.add(minKey);
 			distances.remove(minKey);			
 		}
+		
+		return results;
+	}
+	
+	/**
+	 * Query the model and try to predic iris type using the N nearest neighbors
+	 * @param iris 
+	 * @param learningset
+	 * @param N Nombre de plus proches voisins considérés
+	 * @return
+	 */
+	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N) {
+		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset);
+		ArrayList<Iris> results = IrisDataSetAnalyser.SortDistances(distances);
+		
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
 		
 		// get neighbors scores
+		int i;
 		for(i=0;i<Math.min(N, results.size());i++) {		
 			Iris r = results.get(i);
 			if(neighbors.containsKey(r.type)) {
@@ -112,6 +123,49 @@ public class IrisDataSetAnalyser {
 				neighbors.put(r.type, d);				
 			} else {
 				neighbors.put(r.type, 1.0);
+			}
+		}
+		// get max type score
+		Iterator<Entry<String, Double>> entries = neighbors.entrySet().iterator();
+		String maxKey = null;
+		double maxValue = 0;
+		
+		while(entries.hasNext()) {
+			Map.Entry<String,Double> entry = (Map.Entry<String,Double>) entries.next();
+			String key = (String)entry.getKey();
+		    Double value = (Double)entry.getValue();
+		    if(maxKey == null || maxValue < value) {
+		    	maxKey = key;
+		    	maxValue = value;			    	
+		    }
+		}
+		
+		return maxKey;
+	}
+	/**
+	 * Query the model and try to predic iris type using the N nearest neighbors weighted by order
+	 * @param iris 
+	 * @param learningset
+	 * @param N Nombre de plus proches voisins considérés
+	 * @return
+	 */
+	public static String QueryWeightedKNN(Iris iris, ArrayList<Iris> learningset, int N) {
+		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset);
+		ArrayList<Iris> results = IrisDataSetAnalyser.SortDistances(distances);
+		
+		HashMap<String,Double> neighbors = new HashMap<String,Double>();
+		
+		// get neighbors scores
+		int i;
+		for(i=0;i<Math.min(N, results.size());i++) {		
+			Iris r = results.get(i);
+			if(neighbors.containsKey(r.type)) {
+				double d = neighbors.get(r.type);
+				d+=1/(double)(i+2);
+				//System.out.println("Added neighbor score "+r.type+" to "+ d);
+				neighbors.put(r.type, d);				
+			} else {
+				neighbors.put(r.type, 1/(double)(i+2));
 			}
 		}
 		
@@ -144,7 +198,8 @@ public class IrisDataSetAnalyser {
 		int nbGoodPrediction = 0;
 			
 		for(Iris iris : testset) {
-			String result = QueryKNN(iris, learningset, N);
+			//String result = QueryKNN(iris, learningset, N);
+			String result = QueryWeightedKNN(iris, learningset, N);
 			if(TestPrediction(iris, result)) {
 				nbGoodPrediction++;
 			}
@@ -243,7 +298,7 @@ public class IrisDataSetAnalyser {
 	 */
 	public static void main(String[] args) {		
 		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
-		RandomTest(70,10);
+		RandomTest(70,-1);
 		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
 		//FixedTest(10);
 	}
