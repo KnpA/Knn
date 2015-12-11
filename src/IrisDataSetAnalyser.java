@@ -322,8 +322,12 @@ public class IrisDataSetAnalyser {
 	 */
 	public static void main(String[] args) {		
 		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
-		RandomTest(70,-1);
+        for(int p=10; p<100; p+=10) {
+        	//RandomTest(p,10);
+        }
 		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
-		FixedTest(28,50);
+        for(int p=10; p<100; p+=10) {
+        	FixedTest(p,10);
+        }
 	}
 }
