@@ -14,8 +14,8 @@ public class IrisDataSetAnalyser {
 	private static final boolean DEBUG = false;
 
 	/**
-	 * Lecture d'un fichier de données au format CSV
-	 * @param csvFile Nom du fichier à parcourir
+	 * Lecture d'un fichier de donnees au format CSV
+	 * @param csvFile Nom du fichier a parcourir
 	 * @return Liste d'Iris contenus dans le fichier
 	 */
 	public static ArrayList<Iris> ReadFile(String csvFile) {
@@ -63,7 +63,7 @@ public class IrisDataSetAnalyser {
 	}
 	
 	/*
-	 * Fonction plus utilisée, à enlever ?
+	 * Fonction plus utilisï¿½e, ï¿½ enlever ?
 	public static void TestDistance(Iris iris, ArrayList<Iris> dataset) {
 		int i;
 		for(i=0;i<dataset.size();i++) {
@@ -134,10 +134,10 @@ public class IrisDataSetAnalyser {
 	}
 	
 	/**
-	 * Boucle de prédiction sur tout le Test Set
-	 * @param learningset Learning Set données apprises
-	 * @param testset Test Set à observer
-	 * @param N Nombre de voisins proches à comparer 
+	 * Boucle de prï¿½diction sur tout le Test Set
+	 * @param learningset Learning Set donnï¿½es apprises
+	 * @param testset Test Set ï¿½ observer
+	 * @param N Nombre de voisins proches ï¿½ comparer 
 	 */
 	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
 		int nbTest = 0;
@@ -157,10 +157,10 @@ public class IrisDataSetAnalyser {
 	}
 	
 	/**
-	 * Retourne le résultat d'une prédiction avec la valeur réelle de l'Iris
-	 * @param iris Iris à comparer
-	 * @param typePredicted Type de l'Iris prédit
-	 * @return true si la prédiction est juste, false sinon 
+	 * Retourne le rï¿½sultat d'une prï¿½diction avec la valeur rï¿½elle de l'Iris
+	 * @param iris Iris ï¿½ comparer
+	 * @param typePredicted Type de l'Iris prï¿½dit
+	 * @return true si la prï¿½diction est juste, false sinon 
 	 */
 	public static boolean TestPrediction(Iris iris, String typePredicted) {
 		//System.out.println("Predicted type: " + typePredicted + ", Real type: " + iris.type + ", Prediction is " + iris.type.equals(typePredicted));
@@ -168,7 +168,7 @@ public class IrisDataSetAnalyser {
 	}
 	
 	/**
-	 * Test avec un Learning Set contenant des valeurs choisies aléatoirement
+	 * Test avec un Learning Set contenant des valeurs choisies alï¿½atoirement
 	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
 	 * @param maxK K voisins maximum voulu
 	 */
@@ -212,7 +212,7 @@ public class IrisDataSetAnalyser {
 	}
 	
 	/**
-	 * Test sur un Learning Set enregistré en dur
+	 * Test sur un Learning Set enregistrï¿½ en dur
 	 * @param maxK K maximum voulu de voisins
 	 */
 	public static void FixedTest(int maxK) {
@@ -243,7 +243,10 @@ public class IrisDataSetAnalyser {
 	 */
 	public static void main(String[] args) {		
 		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
-		RandomTest(70,10);
+		//Loop to test with different percentage of learning data, from 10 to 90%
+		for(int p=10; p<100; p+=10){
+			RandomTest(p,10);
+		}
 		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
 		//FixedTest(10);
 	}
