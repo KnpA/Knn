@@ -62,18 +62,28 @@ public class IrisDataSetAnalyser {
 		return result;
 	}
 	
-	
-	public static HashMap<Iris,Double> GetDistances(Iris iris, ArrayList<Iris> dataset){
+	/**
+	 * Obtient les distances entre un Iris requête et les iris d'une collection
+	 * @param iris
+	 * @param dataset
+	 * @param L Type de distance : 1 pour manhattan, 2 pour euclidien ...
+	 * @return
+	 */
+	public static HashMap<Iris,Double> GetDistances(Iris iris, ArrayList<Iris> dataset, int L){
 		HashMap<Iris,Double> distances = new HashMap<Iris,Double>();
 		int i;
 		// get distances
 		for(i=0;i<dataset.size();i++) {			
-			distances.put(dataset.get(i), iris.getDistance(dataset.get(i), 2));
+			distances.put(dataset.get(i), iris.getDistance(dataset.get(i), L));
 		}
 		
 		return distances;
 	}
-	
+	/**
+	 * Trie la map des distances
+	 * @param distances
+	 * @return
+	 */
 	public static ArrayList<Iris> SortDistances(HashMap<Iris,Double> distances){
 		ArrayList<Iris> results = new ArrayList<Iris>();
 		// sort distances
@@ -104,10 +114,11 @@ public class IrisDataSetAnalyser {
 	 * @param iris 
 	 * @param learningset
 	 * @param N Nombre de plus proches voisins considérés
-	 * @return
+	 * @param L Type de distance : 1 pour manhattan, 2 pour euclidien ...
+	 * @return predicted type
 	 */
-	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N) {
-		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset);
+	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N, int L) {
+		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset, L);
 		ArrayList<Iris> results = IrisDataSetAnalyser.SortDistances(distances);
 		
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
@@ -147,10 +158,10 @@ public class IrisDataSetAnalyser {
 	 * @param iris 
 	 * @param learningset
 	 * @param N Nombre de plus proches voisins considérés
-	 * @return
+	 * @return predicted type
 	 */
 	public static String QueryWeightedKNN(Iris iris, ArrayList<Iris> learningset, int N) {
-		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset);
+		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset,2);
 		ArrayList<Iris> results = IrisDataSetAnalyser.SortDistances(distances);
 		
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
@@ -193,13 +204,14 @@ public class IrisDataSetAnalyser {
 	 * @param testset Test Set à observer
 	 * @param N Nombre de voisins proches à comparer 
 	 */
-	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N) {
+	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N, int L) {
 		int nbTest = 0;
 		int nbGoodPrediction = 0;
 			
 		for(Iris iris : testset) {
-			//String result = QueryKNN(iris, learningset, N);
-			String result = QueryWeightedKNN(iris, learningset, N);
+			
+			String result = QueryKNN(iris, learningset, N, L);
+			//String result = QueryWeightedKNN(iris, learningset, N);
 			if(TestPrediction(iris, result)) {
 				nbGoodPrediction++;
 			}
@@ -227,7 +239,7 @@ public class IrisDataSetAnalyser {
 	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
 	 * @param maxK K voisins maximum voulu
 	 */
-	public static void RandomTest(int LearningSetPercentage, int maxK) {
+	public static void RandomTest(int LearningSetPercentage, int maxK, int L) {
 		ArrayList<Iris> learningSet = new ArrayList<Iris>();
 		ArrayList<Iris> testSet = new ArrayList<Iris>();
 		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
@@ -260,7 +272,7 @@ public class IrisDataSetAnalyser {
 			maxK = learningSet.size();
 		
 		for(k=1;k<=maxK;k++){
-			TestKNNModel(learningSet,testSet,k);			
+			TestKNNModel(learningSet,testSet,k, L);			
 		}
 		if(VERBOSE)
 			System.out.println("\n*** End of Random TestKNNModel ***\n");
@@ -271,7 +283,7 @@ public class IrisDataSetAnalyser {
 	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
 	 * @param maxK K voisins maximum voulu
 	 */
-	public static void FixedTest(int LearningSetPercentage, int maxK) {
+	public static void FixedTest(int LearningSetPercentage, int maxK, int L) {
 		ArrayList<Iris> learningSet = new ArrayList<Iris>();
 		ArrayList<Iris> testSet = new ArrayList<Iris>();
 		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
@@ -310,7 +322,7 @@ public class IrisDataSetAnalyser {
 			maxK = learningSet.size();
 		
 		for(k=1;k<=maxK;k++){
-			TestKNNModel(learningSet,testSet,k);			
+			TestKNNModel(learningSet,testSet,k,L);			
 		}
 		if(VERBOSE)
 			System.out.println("\n*** End of Fixed TestKNNModel ***\n");
@@ -322,8 +334,8 @@ public class IrisDataSetAnalyser {
 	 */
 	public static void main(String[] args) {		
 		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
-		RandomTest(70,-1);
+		RandomTest(70,-1,2);
 		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
-		FixedTest(28,50);
+		FixedTest(28,50,2);
 	}
 }
