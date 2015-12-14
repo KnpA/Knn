@@ -2,10 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -72,12 +69,18 @@ public class IrisDataSetAnalyser {
 	 * @param L Type de distance : 1 pour manhattan, 2 pour euclidien ...
 	 * @return
 	 */
-	public static HashMap<Iris,Double> GetDistances(Iris iris, ArrayList<Iris> dataset, int L){
+	public static HashMap<Iris,Double> GetDistances(Iris iris, ArrayList<Iris> dataset, int L, boolean with_sepal_width){
 		HashMap<Iris,Double> distances = new HashMap<Iris,Double>();
 		int i;
 		// get distances
-		for(i=0;i<dataset.size();i++) {			
-			distances.put(dataset.get(i), iris.getDistance(dataset.get(i), L));
+		if(with_sepal_width) {
+			for(i=0;i<dataset.size();i++) {
+				distances.put(dataset.get(i), iris.getDistance(dataset.get(i), L));
+			}
+		} else {
+			for(i=0;i<dataset.size();i++) {
+				distances.put(dataset.get(i), iris.getDistanceWithoutSepalWidth(dataset.get(i), L));
+			}
 		}
 		
 		return distances;
@@ -120,8 +123,8 @@ public class IrisDataSetAnalyser {
 	 * @param L Type de distance : 1 pour manhattan, 2 pour euclidien ...
 	 * @return predicted type
 	 */
-	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N, int L) {
-		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset, L);
+	public static String QueryKNN(Iris iris, ArrayList<Iris> learningset, int N, int L, boolean with_sepal_width) {
+		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset, L, with_sepal_width);
 		ArrayList<Iris> results = IrisDataSetAnalyser.SortDistances(distances);
 		
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
@@ -156,6 +159,7 @@ public class IrisDataSetAnalyser {
 		
 		return maxKey;
 	}
+
 	/**
 	 * Query the model and try to predic iris type using the N nearest neighbors weighted by order
 	 * @param iris 
@@ -163,8 +167,8 @@ public class IrisDataSetAnalyser {
 	 * @param N Nombre de plus proches voisins considérés
 	 * @return predicted type
 	 */
-	public static String QueryWeightedKNN(Iris iris, ArrayList<Iris> learningset, int N) {
-		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset,2);
+	public static String QueryWeightedKNN(Iris iris, ArrayList<Iris> learningset, int N, int L, boolean with_sepal_width) {
+		HashMap<Iris,Double> distances = IrisDataSetAnalyser.GetDistances(iris, learningset, L, with_sepal_width);
 		ArrayList<Iris> results = IrisDataSetAnalyser.SortDistances(distances);
 		
 		HashMap<String,Double> neighbors = new HashMap<String,Double>();
@@ -207,14 +211,17 @@ public class IrisDataSetAnalyser {
 	 * @param testset Test Set à observer
 	 * @param N Nombre de voisins proches à comparer 
 	 */
-	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N, int L) {
+	public static void TestKNNModel(ArrayList<Iris> learningset, ArrayList<Iris> testset, int N, int L, boolean weighted, boolean with_sepal_width) {
 		int nbTest = 0;
 		int nbGoodPrediction = 0;
 			
 		for(Iris iris : testset) {
-			
-			String result = QueryKNN(iris, learningset, N, L);
-			//String result = QueryWeightedKNN(iris, learningset, N);
+			String result = "";
+			if(weighted)
+				result = QueryWeightedKNN(iris, learningset, N, L, with_sepal_width);
+			else
+				result = QueryKNN(iris, learningset, N, L, with_sepal_width);
+
 			if(TestPrediction(iris, result)) {
 				nbGoodPrediction++;
 			}
@@ -237,130 +244,12 @@ public class IrisDataSetAnalyser {
 		return iris.type.equals(typePredicted);
 	}
 	
-	public static double Median(ArrayList<Float> values)
-	{
-	    Collections.sort(values);
-	 
-	    if (values.size() % 2 == 1)
-		return (double) values.get((values.size()+1)/2-1);
-	    else
-	    {
-		double lower = (double) values.get(values.size()/2-1);
-		double upper = (double) values.get(values.size()/2);
-	 
-		return (lower + upper) / 2.0;
-	    }	
-	}
-	
-	public static double Mean(ArrayList<Float> values)
-	{
-		double sum = 0;
-		for(Float f : values) {
-			sum += f;
-		}
-		return sum/values.size();
-	}
-	
-	public static double Min(ArrayList<Float> values)
-	{
-		double min = Float.MAX_VALUE;
-		for(Float f : values) {
-			if(f < min)
-				min = f;
-		}
-		return min;
-	}
-	
-	public static double Max(ArrayList<Float> values)
-	{
-		double max = Float.MIN_VALUE;
-		for(Float f : values) {
-			if(f > max)
-				max = f;
-		}
-		return max;
-	}
-	
-	public static double Card(ArrayList<Float> values)
-	{
-		double card = 0;
-		float last = Float.MIN_VALUE;
-		Collections.sort(values);
-		for(Float f : values) {
-			if(last != f)
-				card++;
-			last = f;
-		}
-		return card;
-	}
-	
-	public static double StdDev(ArrayList<Float> values)
-	{
-		double mean = Mean(values);
-        double temp = 0;
-        for(float a : values) {
-            temp += (mean-a)*(mean-a);
-        }
-		double variance = temp/values.size();
-		return Math.sqrt(variance);
-	}
-	
-	public static double Quartile(ArrayList<Float> values, int quartile)
-	{
-		Collections.sort(values);
-		
-		return values.get(values.size()*quartile/4);
-	}
-	
-	/**
-	 * Data Quality Report on Continuous Features
-	 * @param dataSet Le Data Set à étudier
-	 * @param features Le nom des Features
-	 */
-	public static void DataQualityReport(ArrayList<Iris> dataSet, ArrayList<String> features) {
-		System.out.println("*** Data Quality Report ***\n");
-		System.out.println("Features\tCount\t%Miss.\tCard.\tMin.\t1st Qrt.\tMean\tMedian\t3rd Qrt.\tMax\tStd Dev.");
-		
-		// Init DQR
-		NumberFormat fmt = new DecimalFormat("#0.00");  
-		HashMap<Integer,ArrayList<Float>> map = new HashMap<>();
-		for(int i=0; i<features.size(); i++) {
-			map.put(i, new ArrayList<Float>());
-		}
-		
-		// For each line :
-		for(Iris iris : dataSet) {
-			map.get(0).add(iris.sepal_length);
-			map.get(1).add(iris.sepal_width);
-			map.get(2).add(iris.petal_length);
-			map.get(3).add(iris.petal_width);
-		}
-		
-		// For each feature calculate data		
-		int total = dataSet.size();
-		int i = 0;
-		for(String feature : features) {
-			double median = Median(map.get(i));
-			double mean = Mean(map.get(i));
-			double min = Min(map.get(i));
-			double max = Max(map.get(i));
-			double card = Card(map.get(i));
-			int miss = total - map.get(i).size();
-			double first_qrt = Quartile(map.get(i),1);
-			double third_qrt = Quartile(map.get(i),3);
-			double std_dev = StdDev(map.get(i));
-			System.out.println(feature+"\t"+map.get(i).size()+"\t"+miss+"\t"+fmt.format(card)+"\t"+fmt.format(min)+"\t"+fmt.format(first_qrt)+"\t\t"+fmt.format(mean)+"\t"+fmt.format(median)+"\t"+fmt.format(third_qrt)+"\t\t"+fmt.format(max)+"\t"+fmt.format(std_dev));
-			i++;
-		}
-		System.out.println("\n*** End of Data Quality Report ***\n");
-	}
-	
 	/**
 	 * Test avec un Learning Set contenant des valeurs choisies aléatoirement
 	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
 	 * @param maxK K voisins maximum voulu
 	 */
-	public static void RandomTest(int LearningSetPercentage, int maxK, int L) {
+	public static void RandomTest(int LearningSetPercentage, int maxK, int L, boolean weighted, boolean with_sepal_width) {
 		ArrayList<Iris> learningSet = new ArrayList<Iris>();
 		ArrayList<Iris> testSet = new ArrayList<Iris>();
 		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
@@ -393,7 +282,7 @@ public class IrisDataSetAnalyser {
 			maxK = learningSet.size();
 		
 		for(k=1;k<=maxK;k++){
-			TestKNNModel(learningSet,testSet,k, L);			
+			TestKNNModel(learningSet, testSet, k, L, weighted, with_sepal_width);			
 		}
 		if(VERBOSE)
 			System.out.println("\n*** End of Random TestKNNModel ***\n");
@@ -404,7 +293,7 @@ public class IrisDataSetAnalyser {
 	 * @param LearningSetPercentage Taille du Learning Set en pourcentage
 	 * @param maxK K voisins maximum voulu
 	 */
-	public static void FixedTest(int LearningSetPercentage, int maxK, int L) {
+	public static void FixedTest(int LearningSetPercentage, int maxK, int L, boolean weighted, boolean with_sepal_width) {
 		ArrayList<Iris> learningSet = new ArrayList<Iris>();
 		ArrayList<Iris> testSet = new ArrayList<Iris>();
 		ArrayList<Iris> dataSet = IrisDataSetAnalyser.ReadFile("./datasets/iris.data");
@@ -443,7 +332,7 @@ public class IrisDataSetAnalyser {
 			maxK = learningSet.size();
 		
 		for(k=1;k<=maxK;k++){
-			TestKNNModel(learningSet,testSet,k,L);			
+			TestKNNModel(learningSet, testSet, k, L, weighted, with_sepal_width);			
 		}
 		if(VERBOSE)
 			System.out.println("\n*** End of Fixed TestKNNModel ***\n");
@@ -461,20 +350,33 @@ public class IrisDataSetAnalyser {
 		features.add("petal_length");
 		features.add("petal_width");
 		
-		DataQualityReport(dataSet, features);
+		new IrisDataQualityReport(dataSet, features);
 		
 		// Parameters
-		int maxK = 50;
-		int distanceType = 2;
+		int maxK = 10; // K voisins maximum à tester 
+		//(si maxK < 1 ou maxK > à la taille du Learning Set, il sera de la taille du learning set)
+		int distanceType = 2; // 1 = manhattan, 2 = euclidienne
+		boolean weighted = false;
+		boolean with_sepal_width = true;
 
 		// Define Percentage of Learning Data Set, Max K-NN and see Accuracy for each K
         for(int p=10; p<100; p+=10) {
-        	//RandomTest(p,maxK,distanceType);
+        	//RandomTest(p, maxK, distanceType, weighted, with_sepal_width);
         }
 
 		// Example with a defined Learning Set of 20% and a Max K-NN as parameter
         for(int p=10; p<100; p+=10) {
-        	FixedTest(p,maxK,distanceType);
+        	FixedTest(p, maxK, distanceType, weighted, with_sepal_width);
         }
+  
+        /* Test de comparaison des distances de Manhattan et Euclidienne
+        FixedTest(60, -1, 1, false, true);
+        FixedTest(60, -1, 2, false, true);
+        */
+        
+        /* Test de comparaison de pondération (avec puis sans)
+        FixedTest(30, -1, 2, true, true);
+        FixedTest(30, -1, 2, false, true);
+        */
 	}
 }

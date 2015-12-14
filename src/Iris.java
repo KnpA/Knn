@@ -51,6 +51,17 @@ public class Iris {
 		return dist;		
 	}
 	
+	public double getDistanceWithoutSepalWidth(Iris other, float power) {
+		double dist;
+		
+		dist =  Math.pow(Math.abs(this.sepal_length - other.sepal_length),power) +
+				Math.pow(Math.abs(this.petal_length - other.petal_length),power) +
+				Math.pow(Math.abs(this.petal_width - other.petal_width),power);
+		dist = Math.pow(dist, 1.0/power);
+		
+		return dist;		
+	}
+	
 	public double getDistanceSepalLength(Iris other, float power) {
 		return Math.pow(Math.pow(Math.abs(this.sepal_length - other.sepal_length), power), 1.0/power);
 	}
